@@ -1,0 +1,345 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage{graphicx} % Required for inserting images
+\usepackage{fullpage}
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{mathtools}
+\usepackage{physics}
+\usepackage[dvipsnames]{xcolor} 
+\usepackage{tikz}
+\usepackage{epigraph} % for fancy quotes
+\usepackage{minted} % Required for highlightedcode listing
+\usepackage{float}
+\usepackage{hyperref} % Required for referencing contents
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue, urlcolor=blue}
+
+
+\title{Machine Learning Techniques}
+\author{Soumya M}
+\date{June 2023}
+
+\begin{document}
+
+\maketitle
+This comprises of exhaustive notes for the course Machine Learning Techniques (BSCS2007) at IITM taught by Prof. Arun Rajkumar
+\tableofcontents
+\newpage
+
+\section{Introduction}
+\subsection{What is machine leanring?}
+Machine learning is a sub field of AI, computer science that deals with deriving meaning of vasts amount of data and predicting results based on it using mathematical ideas.\\
+Machine learning is not used for tasks that are procedural, for example finding Fibonacci sequence. Machine learning is not memorization, since it can predict values for unknown data based on previous training data. 
+\subsection{Broad Paradigms}
+\textbf{\underline{Supervised Learning}:} Supervised learning is where we have labeled data, i.e, we have input variables and output variables and the model learns the map between the two to predict output for test data.
+\begin{itemize}
+    \item \underline{Classification}: When the goal is the classify the input data into different classes, its a classification problem. For example, email spam detection, we have two classes, an email can be either spam or not spam, which is a binary classification problem. Similarly there can be more than two classes, we have multiclass classification and when the classes are ordered (eg: High, Medium, Low) it is ordinal classification.
+    \item \underline{Regression}: When the output variable is continuous, real number, it is a regression problem. For example: predicting the price of houses given its area, number of floors, rooms, location etc.
+    \item \underline{Ranking}: When the goal is to order and sort the data based on relevant conditions. Foe example, a search engine ranking the news based on interaction data.
+    \item \underline{Structure Learning}: When the output variable is a complex structure like a tree or a graph, it is structure learning. 
+\end{itemize}
+\textbf{\underline{Unsupervised Learning}:} When the data is unlabelled, in unsupervised learning our goal might be to label data into groups and find patterns in the data.
+\begin{itemize}
+    \item \underline{Clustering}: Grouping the data into clusters of similar elements. For example, a use case can be grouping of news articles with similar topics together.
+    \item \underline{Representation Learning}: The model learns to represent the data on its own. It often becomes difficult to work with very large data where there are too many elements in each input data point. In such cases, we reduce the number of elements in each input data points by finding which elements infer very less about the output.
+\end{itemize}
+\textbf{\underline{Sequential Learning}:} The model doesn't learn only once, instead it learns from the sequential data and gets feedback, enters another environment and then learns again. For example in text prediction, the model gets a phrase, and the next word in each step depends on the previous phrase.
+\begin{itemize}
+    \item \underline{Online Learning}
+    \item \underline{Multi-armed Bandits}
+    \item \underline{Reinforcement Learning}
+\end{itemize}
+
+\subsection{Representation Learning}
+\epigraph{\textit{Comprehension is compression}}{\textit{George Chaitin}}
+\noindent Suppose you have the following vectors: $\begin{bsmallmatrix}
+    -7 \\ -14
+\end{bsmallmatrix}, \begin{bsmallmatrix}
+    2.5 \\ 5
+\end{bsmallmatrix}, \begin{bsmallmatrix}
+    0.5 \\ 1 
+\end{bsmallmatrix}, \begin{bsmallmatrix}
+    0 \\ 0
+\end{bsmallmatrix}$. Notice that all of these lie on the line $\lambda(\hat{i}+2\hat{j})$. In doing so, we can represent them as $-7\begin{bsmallmatrix}
+    1 \\ 2
+\end{bsmallmatrix}, 2.5 \begin{bsmallmatrix}
+    1 \\ 2
+\end{bsmallmatrix}, 0.5 \begin{bsmallmatrix}
+    1 \\ 2
+\end{bsmallmatrix}, 0 \begin{bsmallmatrix}
+    1 \\ 2
+\end{bsmallmatrix}$. This saves us some space as we are storing less numbers than earlier. However what happens when the points all do not lie in the same line?
+There are two methods to deal with this:
+\begin{enumerate}
+    \item We consider base vectors, and represent all our vectors as a linear combination of our base vectors. However in this method, we have to save more numbers than usual. Suppose, we have $n$ 2-D vectors then we were storing 2n numbers initially, but now we are storing $2n+4$ numbers (4 extra for the two base vectors).
+    \item We can think of using a ``proxy'', for such points say $x$. In our 2-D case, for the points that don't lie on the same line, along the vector $w$ as others, we can use the point closest (to minimise information loss) to $x$ that lie on the line as ``proxy''. Which is the same as the projection of $x$ on $w$. Let the point that will act as proxy be represented as $y$, then $$y= \left(\dfrac{x^Tw}{\norm{w}^2} \right) w$$
+    For more on why we chose the projection here, check APPENDIX A.
+\end{enumerate}
+
+Now, generalising for d-dimensions, some $x_k \in \mathbb{R}^d$ that does not lie on the line $w$ will have proxy  $y_k= \left(\dfrac{x_k^Tw}{\norm{w}^2} \right) w$. The proxy for any other point that lies on the line represented by $w$, is itself. By using proxy, we are introducing some error also known as residue $E_k = x_k-y_k$.
+
+Now let us consider the `centered' \footnote{a dataset is said to be mean-centered or simply centered here, if it has zero mean. Subtract the mean from your data to make it centered} data set, $x=\{x_i: 1 \leq i \leq n, x_i \in \mathbb{R}^d \}$ and that there is not one, but multiple points that don't lie along $w$. Further, we assume that we have chosen a $w$ such that $\norm{w}=1$. Hence, the residue can be given as $E_i = x_i - (x_i^Tw)w$. Our goal is to chose a certain $w$ such that the net of all residue is minimum, or we have to minimise the following quantity: 
+\begin{align}
+    f(w)= \dfrac{1}{n} \sum_{i=1}^{n} \norm{x_i - (x_i^Tw)w}^2
+\end{align}
+This quantity is also known as \textbf{reconstruction error} or mean squared error (MSE). Now,
+\begin{align*}
+    \min_w f(w) = \min_w \quad \dfrac{1}{n} \sum_{i=1}^{n} \norm{x_i - (x_i^Tw)w}^2\\
+    \implies \min_w f(w)= \max_w \quad \dfrac{1}{n} \sum_{i=1}^{n} (x_i^Tw)^2\\
+    \implies \min_w f(w)= \max_w \quad \dfrac{1}{n} \sum_{i=1}^{n} w^T x_i x_i^T w\\
+    \implies \min_w f(w)= \max_w \quad w^T \left(\dfrac{1}{n} \sum_{i=1}^{n} x_i x_i^T \right) w
+\end{align*}
+\begin{align}
+    \implies \boxed{\min_w f(w) = \max_w \quad w^T C w}
+\end{align}
+where, $C= \dfrac{1}{n} \sum_{i=1}^{n} x_i x_i^T$, also known as the \textbf{covariance matrix}\footnote{for sample data of size n, $C= \dfrac{1}{n-1} \sum_{i=1}^{n} x_i x_i^T$ is the unbiased covariance matrix}. Note that minimisation of the reconstruction error/MSE is the same as maximising the variance of the points along the line. In the next section we continue from here and find out the solution. 
+\subsection{Extra reading}
+I recommend to check out \href{https://stats.stackexchange.com/a/140579}{this great answer on cross-validated} to be clear with geometric interpretations.
+
+\newpage
+\section{Principal Component Analysis}
+Principal component analysis or simply PCA is an algorithm to reduce the number of features from a large dataset for easier visualization/further computation by retaining only the features that infer the most about the data. It is therefore a type of dimensionality reduction (unsupervised learning). To understand PCA algorithm, let us first define the data.
+\subsection{Deriving PCA} \label{Deriving PCA}
+We have our inputs as centered data points $x = \{x_i : 1 \leq i \leq n, x_i \in \mathbb{R}^d\}$. We will represent this data along a line given by $w_1$ as given in previous section, however in doing so we lose some information in the form or residues, $E_i^{(1)} = x_i - (x_i^Tw_1)w_1$. In order to capture that information, we can now repeat the process of getting proxy but this time with the dataset $\{E_i^{(1)}=x_i - (x_i^Tw_1)w_1 : 1 \leq i \leq n, E_i^{(1)} \in \mathbb{R}^d\}$ on some $w_2$. However we will still loose some information as residue, say $E_i^{(2)} = x_i - (x_i^Tw_1)w_1 - (x_i^Tw_2)w_2$. In fact we will have to repeat till we find $w_d$ so that the residue finally becomes zero and we can write: 
+\begin{gather*}
+    E_d= 0\\
+    \implies x_i - (x_i^Tw_1)w_1 - ((E_i^{(1)})^Tw_2)w_2 - \hdots - ((E_i^{(d-1)})^Tw_d)w_d = 0\\
+    \implies x_i - (x_i^Tw_1)w_1 - [(x_i-(x_i^Tw_1)w_1)^Tw_2]w_2 - \hdots = 0
+\end{gather*}
+Note that all residues $E_i^{(1)}$ are orthogonal to $w_1$, so $w_2$ which best fits $E_i^{(1)}$ is also orthogonal to $w_1$ or $w_1^Tw_2=0$. Similarly, other $w_i, w_j (i \neq j)$ are also orthogonal \footnote{ \quad in other words we can also say that all $w_i, w_j$ for $i \neq j$ are uncorrelated}. So after simplification we can write: 
+\begin{align}
+    x_i - (x_i^Tw_1)w_1 - (x_i^Tw_2)w_2 - \hdots - (x_i^Tw_d)w_d = 0 \nonumber \\
+    \implies x_i = (x_i^Tw_1)w_1 - (x_i^Tw_2)w_2 - \hdots - (x_i^Tw_d)w_d
+\end{align}
+Now we have got a representation for each data point $x_i$. Let us have a look at how many numbers we have to store, from where we started. Initially, we  were storing $n \times d$ numbers, $n$ vectors $x_i$ each of $d$-dimension. Now we are storing, $d$ $d$-dimensional vectors and $n \times d$ coefficients \footnote{\quad $x_i^Tw_1, x_i^Tw_2 \dots$ are constants as $x_i^Tw_j$ is dot product of $x_i, w_j \in \mathbb{R}^d$}, hence a total of $d \times (d +n)$. That's no improvement from where we started, we even increased the \textit{number of numbers} we have to store. But what if we don't need to repeat all the way up to $w_d$? Maybe the residue at some stage becomes zero before doing it $d$ times? Or what if we do a trade-off, loosing some information in exchange for less complexity? Suppose we need only $w_1,w_2 \dots w_k$ where $k<<d$, then we are storing only $k(d+n)$ numbers. We will come back at this later to find such a `k'. let us first look at how to get the $w_i$'s.
+
+From the last chapter we get that, to find a $w_1$, we must find $w_1$ such that $w_1^TCw_1$ is maximum, constraint being $\norm{w_1}=1$. Using Lagrange multiplier, $$\mathcal{L}(w_1, \lambda_1) = w_1^TCw_1 - \lambda_1(w_1^Tw_1 -1)$$
+\begin{gather*}
+    \pdv{\mathcal{L}(w_1,\lambda_1)}{w_1} = 0 \implies 2w_1^TC - 2\lambda_1 w_1^T = 0 \implies Cw_1 = \lambda_1 w_1 \\
+    \pdv{\mathcal{L}(w_1,\lambda_1)}{\lambda_1} = 0 \implies w_1^Tw_1 -1 = 0
+\end{gather*}
+Let us now look at the equation $Cw_1 = \lambda_1w_1$ more carefully, $w_1$ is the eigenvector and $\lambda_1$ is the eigenvalue for $C$. Further,
+\begin{gather*}
+    Cw_1 = \lambda_1w_1 \\
+    \implies w_1^TCw_1 = w_1^T\lambda_1 w_1\\
+    \implies w_1^TCw_1 = \lambda_1 w_1^T w_1 \\
+    \implies \lambda_1 = w_1^TCw_1
+\end{gather*}
+So, for $w_1^TCw_1$ to be maximum, $\lambda_1$ must be the largest eigenvalue, and $w_1$ is the corresponding eigenvector. Let us now head to find out $w_2$. Minimizing the reconstruction error, $$f(w_2) = \dfrac{1}{n} \sum_{i=1}^n \norm{x_i - (x_i^Tw_1)w_1 - (x_i^Tw_2)w_2}^2$$
+Once again, $$\min_{w_2} f(w_2) = \max_{w_2} \quad \dfrac{1}{n} (x_i^Tw_2)^2 = \max_{w_2} \quad w_2^TCw_2$$
+We again use the method of Lagrange multipliers, to maximise $w_2^TCw_2$ while the constraints being $\norm{w_2}=1$ and $w_1^Tw_2 = 0$ 
+\begin{gather*}
+    \mathcal{L}(w_2, \lambda_2,\rho) = w_2^TCw_2 - \lambda_2(w_2^Tw_2 -1) - \rho(w_2^Tw_1)\\
+    \pdv{\mathcal{L}(w_2, \lambda_2,\rho)}{w_2} = 2w_2^TC - 2 \lambda_2w_2^T - 2\rho w_1^T = 0 \\
+    \implies w_2^TC- \lambda_2w_2^T - \rho w_1^T = 0
+\end{gather*}
+Right-multiplying with $w_2$ gives,
+$$w_2^TCw_2- \lambda_2 = 0 \implies \lambda_2 = w_2^TCw_2 $$
+This is exactly what we saw a while ago with $w_1$. So, $\lambda_2$ must be the second largest eigenvalue and $w_2$ the corresponding eigenvector. Proceeding similarly for $d$ times, we will get that, $\lambda_1,\lambda_2, \dots \lambda_d$ are just the eigenvalues in descending order and $w_1,w_2, \dots w_d$ are the corresponding eigenvectors. The vectors, $w_1,w_2, \dots w_d$ are called the \textbf{principal components}. The $\lambda_i$'s capture the total variance of each component. Note that $\lambda_i$ are decreasing as $i$ increases, and hence after some point the change would be almost negotiable.
+
+\tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
+
+\begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1]
+%uncomment if require: \path (0,281); %set diagram left start at 0, and has height of 281
+
+%Shape: Axis 2D [id:dp3116285719748444] 
+\draw  (116,230.3) -- (523,230.3)(156.7,12.5) -- (156.7,254.5) (516,225.3) -- (523,230.3) -- (516,235.3) (151.7,19.5) -- (156.7,12.5) -- (161.7,19.5)  ;
+%Straight Lines [id:da9493765931131404] 
+\draw    (172,34) -- (195,124) -- (227,174) -- (267,187) -- (305,208) -- (355.2,214.2) -- (400.2,217.2) -- (440.2,219.2) -- (481.2,221.2) ;
+%Shape: Free Drawing [id:dp15163309598125774] 
+\draw  [line width=3] [line join = round][line cap = round] (226.43,173.14) .. controls (226.43,173.14) and (226.43,173.14) .. (226.43,173.14) ;
+%Shape: Free Drawing [id:dp10676798902291562] 
+\draw  [line width=3] [line join = round][line cap = round] (267.43,187.14) .. controls (267.43,187.14) and (267.43,187.14) .. (267.43,187.14) ;
+%Shape: Free Drawing [id:dp5888878904607766] 
+\draw  [line width=3] [line join = round][line cap = round] (303.43,207.14) .. controls (303.43,207.14) and (303.43,207.14) .. (303.43,207.14) ;
+%Shape: Free Drawing [id:dp011755771277117466] 
+\draw  [line width=3] [line join = round][line cap = round] (195.43,124.14) .. controls (195.43,124.14) and (195.43,124.14) .. (195.43,124.14) ;
+%Shape: Free Drawing [id:dp29419730537483035] 
+\draw  [line width=3] [line join = round][line cap = round] (172.43,35.14) .. controls (172.43,35.14) and (172.43,35.14) .. (172.43,35.14) ;
+%Shape: Free Drawing [id:dp3688711031511267] 
+\draw  [line width=3] [line join = round][line cap = round] (400.43,217.14) .. controls (400.43,217.14) and (400.43,217.14) .. (400.43,217.14) ;
+%Shape: Free Drawing [id:dp11880016855035813] 
+\draw  [line width=3] [line join = round][line cap = round] (480.43,221.14) .. controls (480.43,221.14) and (480.43,221.14) .. (480.43,221.14) ;
+%Shape: Free Drawing [id:dp34196926259853955] 
+\draw  [line width=3] [line join = round][line cap = round] (354.43,214.14) .. controls (354.43,214.14) and (354.43,214.14) .. (354.43,214.14) ;
+%Shape: Free Drawing [id:dp8045789618522279] 
+\draw  [line width=3] [line join = round][line cap = round] (439.43,219.14) .. controls (439.43,219.14) and (439.43,219.14) .. (439.43,219.14) ;
+
+% Text Node
+\draw (122.9,185.61) node [anchor=north west][inner sep=0.75pt]  [rotate=-269.24] [align=left] {Variance ($\displaystyle \lambda $)};
+% Text Node
+\draw (237,240) node [anchor=north west][inner sep=0.75pt]   [align=left] {No. of principal component (i)};
+
+\end{tikzpicture}
+
+The above rough graph shows a general trend between variance and no. of principal components. Such graphs are called \textbf{scree plots}. In the scree plot we see that after certain number of PC's, having further principal components have little difference, Hence we look at percentage of variance explained which is the following quantity: 
+\begin{align}
+    \text{\% variance explained by k-th PC} = \dfrac{\lambda_k}{\sum_{i=1}^d\lambda_i}
+\end{align}
+In practice one might say that they want to retain 95\% of the information (or they want to have 95\% cumulative variance explained), in such cases what they mean is we have to consider up to $k$th PC, such that $\dfrac{\sum_{i=1}^{k} \lambda_i}{\sum_{i=1}^{d}\lambda_i} \geq 0.95$ , this is also known as the \textbf{signal to noise ratio}, the numerator denotes the signal, denominator is the noise.
+
+Once, let us stress on some important points. Our data matrix $X$ is a $d \times n$ matrix, with each data point/observation, $x_i$ as its $i$th column, $x_i \in \mathbb{R}^d$. The covariance matrix can be given as $C = \dfrac{1}{n} X X^T = \dfrac{1}{n} \sum_{i=1}^{n} x_ix_i^T$, and is a $d \times d$ matrix, it is a real valued, positive semi-definite symmetric matrix. All eigenvalues are non-negative, the eigenvectors of the covariance matrix are the principal components, mutually orthonormal or each of them uncorrelated with each other.
+
+Now let us remember the questions we asked near the beginning of chapter 2, as $k<d$ we would be storing $k(d+n)$ which is an improvement, achieved by having some loss. Geometrically this means that the data lies nearly in a lower-dimensional linear subspace and each $\lambda$ after $k$th PC is nearly $0$. Additionally, consider a case where the entire data does exist in a lower dimension linear subspace than $d$, say $r$, then every eigenvalue after $r$th PC is going to be $0$.
+
+To get the eigenvalues from the covariance matrix, we can perform eigendecomposition. However the time complexity in doing so for $d\times d$ matrix is $\mathcal{O}(d^3)$. This is going to be difficult for $d >> n$. In the next section we will see if we can reduce the time complexity for such a case. 
+
+\subsection{PCA when d is large} \label{Alternate perspective}
+In this section we will represent our principal components as a linear combination of our initial input vectors. We try to find some $n \times d$ matrix $\alpha$ such that,
+\begin{align}
+    w  = X \alpha
+\end{align}
+where $w$ is the $d \times d$ matrix with the principal components $w_i$'s as its columns and $X = \{x_i : 1 \leq i \leq n, x_i \in \mathbb{R}^d\}$ which can be called the \textit{data matrix}. Here $n < d$, hence the data will surely lie in a low dimensional subspace, in fact the maximum possible dimension of that subspace is $n-1$\footnote{We are assuming here the data is centered, otherwise the maximum dimensionality is $n$, check APPENDIX B for more details} and so there will be  at least $d-(n-1)$ zero eigenvalues. It will be needless to perform eigendecomposition of covariance matrix $\dfrac{1}{n}XX^T$. We know that the non-zero eigenvalues of $XX^T$ and $X^TX$ are equal, same goes for $\dfrac{1}{n}XX^T$ and $\dfrac{1}{n}X^TX$. Let us assume $v_k$ is the eigenvector with unit length of matrix $\dfrac{1}{n}X^TX$ corresponding to eigenvalue $\lambda_k$. Once again, $k$th PC, $w_k$ has unit length,
+\begin{gather}
+    \norm{w_k} = 1 \implies w_k^T w_k = 1 \nonumber \\
+    \implies (X \alpha_k)^T (X \alpha_k) =1 \nonumber \\
+    \implies \alpha_k^T(X^TX)\alpha_k = 1 
+\end{gather}
+In our case, we can write, 
+\begin{gather}
+    \dfrac{1}{n} X^TX v_k= \lambda_k v_k \nonumber \\
+    \implies v_k^T (\dfrac{1}{n} X^TX) v_k = \lambda_k (v_k^Tv_k) \nonumber \\
+    \implies \dfrac{v_k^T}{\sqrt{n\lambda_k}} (X^TX) \dfrac{v_k}{\sqrt{n\lambda_k}} = 1
+\end{gather}
+Comparing equations, (6) and (7) we can say, $\alpha_k = \dfrac{v_k}{\sqrt{n \lambda_k}}$.
+So we can perform eigendecomposition of \textbf{Gram matrix} ($X^TX$) which will be $\mathcal{O}(n^3)$, downscale the obtained eigenvectors of unit length by $\sqrt{n \lambda_k}$ and left multiply the matrix $X$ to the eigenvectors to obtain the principal components. 
+
+\subsection{Kernel PCA}
+So far we have considered cases where the data lies in a linear subspace. However if the previous two methods will not give  a good output if the original data lies in a non linear manifold. We will look at a method known as kernel PCA for this purpose. 
+
+First of all, we again define our data matrix $X$ which is $d \times n$ matrix, its columns $x_i$'s are observations or data points and each row is a feature. We will represent the the $i$th row as $x^{(i)}$, so the value for the second attribute of first observation is $x_{21} = x_{1}^{(2)}$, the square of the same will be shown as $x_{21}^2 = (x_{1}^{(2)})^2$.
+
+We transform the low-dimensional feature space to a higher dimensional feature space using the non-linear map $\Phi(X)$. In other words, for $x_i \in \mathbb{R}^d$ we apply some non-linear map $\Phi$ which outputs, $\Phi(x_i) \in \mathbb{R}^D$, where $D>d$ (the high dimensional feature space is also denoted as $H$). This is done so that when we apply PCA in the higher dimensional feature space, it allows us to represent the principal components as linear combinations of features in $\Phi(X)$, which helps us to capture the non-linearity of the original dataset. We center the data in the feature space as follows, 
+$$\hat{\Phi}(X) = \Phi(X) - \bar{\Phi}(X)= \Phi(X) - \dfrac{1}{n} \sum_{i=1}^n \Phi(X_i)$$
+
+We can now perform PCA by eigendecomposing the Gram matrix, $\hat{\Phi}(X)^T\hat{\Phi}(X)$. Note that $K=\hat{\Phi}(X)^T\hat{\Phi}(X)$ is also called the \textbf{kernel matrix}, we will see what it means shortly. We then proceed in a similar way shown in the last section and write the principal components as $$w = \hat{\Phi}(X)\alpha$$
+
+%\par\noindent\rule{\textwidth}{0.4pt}
+
+However, working in the high dimensional feature space can be computationally difficult or inefficient. In some cases, $\Phi(X)$ can also be infinite dimensional. We somehow only need to find out the values in the kernel matrix, or the pairwise inner product of the elements in higher dimensional feature space to find the principal components. For this we have the \textbf{kernel trick}: we can find the kernel matrix without actually performing operations explicitly in $\Phi(X)$ using kernel functions. Kernel functions denoted as $k(\cdot,\cdot)$, are used to refer to dot product of data points at a higher dimensional feature space without explicitly calculating their representations in the higher dimensional space. $$k(x,x') = \langle \Phi(x),\Phi(x') \rangle =\Phi(x)^T\Phi(x')$$
+And so the $i,j$-th element of the kernel matrix is given as, $$K_{ij} = k(x_i,x_j) = \Phi(x_i)^T\Phi(x_j)$$
+
+\par\noindent\rule{\textwidth}{0.4pt}
+A kernel $k(\cdot,\cdot): \mathbb{R}^d\times \mathbb{R}^d \rightarrow \mathbb{R}$  that satisfies \textbf{Mercer's theorem} is said to be a valid kernel and can be used for whats written above. The conditions of Mercer's theorem are:
+\begin{enumerate}
+    \item $k(\cdot,\cdot)$ must be symmetric, that is $k(x,y) = k(y,x)$
+    \item For any data set $\{x_1,x_2 \dots x_n\}$, the kernel matrix $K \in \mathbb{R}^{n\times n}$ where $K_{ij} = k(x_i,x_j)$ is positive semi-definite
+\end{enumerate}
+For a matrix to be positive semi-definite, all its eigenvalues must be non-negative. Any valid kernel corresponds to a feature mapping $\Phi(\cdot)$ but any $\Phi(\cdot)$ may not have an associated kernel function.
+\par\noindent\rule{\textwidth}{0.4pt}
+
+Some common kernel functions are:
+\begin{enumerate}
+    \item Linear: $k(x,y) = x^Ty$ 
+    \item Polynomial: $k(x,y) = (x^Ty+1)^d$ where $d$ is degree of polynomial.
+    \item Gaussian/Radial: $k(x,y) = exp\left(- \dfrac{\norm{x-y}^2}{2\sigma^2}\right), \sigma>0$, the projected higher space has infinite dimension in this case.
+    \item Sigmoid: $k(x,y) = \tanh(\eta x^Ty+ \beta)$
+\end{enumerate}
+Using linear kernel is the same applying standard PCA described in sections: \ref{Deriving PCA} and \ref{Alternate perspective}.
+
+As we are working with kernels, we have to center the feature space data using kernels too. For which we find the following quantity, centered kernel matrix: $$K_c = K - \textbf{1}_n K -K \textbf{1}_n + \textbf{1}_n K\textbf{1}_n$$ where $\textbf{1}_n$ is $n\times n$ matrix with all elements equal to $1/n$ and $K$ is the kernel matrix with $K_{ij}=k(x_i,x_j)$.
+
+Once again, note that while performing standard PCA, we represented the principal components, $w=X\alpha$. Such reconstruction in case of kernel PCA, $w=\Phi(X) \alpha$ cannot be done as it will require us to find out $\Phi(X)$. However we can compute the new data point with compressed representation as follows: 
+\begin{gather}
+    \hat{x}_{ik} = \Phi(x_i)^Tw_k = \Phi(x_i)^T(\sum_{j=1}^n \Phi(x_j) \alpha_{kj}) \nonumber \\
+    \implies \hat{x}_{ik} = \sum_{j=1}^n \alpha_{kj} K_{ij}
+\end{gather}
+Suppose we only keep up to some $l$ principal components, then the observation $x_i$ becomes:
+\begin{gather}
+    \hat{x_i} = \left[ \sum_{j=1}^n \alpha_{1j} K_{ij}, \sum_{j=1}^n \alpha_{2j} K_{ij} , \dots \sum_{j=1}^n \alpha_{lj} K_{ij} \right]^T
+\end{gather}
+\subsection{Extra reading}
+For further reading on the topics one may refer to the following resources:
+\begin{enumerate}
+    \item Section 12.1 and 12.3, Pattern Recognition and Machine Learning by Christopher M. Bishop
+    \item \href{https://axon.cs.byu.edu/~martinez/classes/778/Papers/KernelPCA.pdf}{Scholkopf B, Smola A, and Müller KR, Kernel principal component analysis, 1999}
+    \item \href{https://www.researchgate.net/publication/41781235_Learning_to_Find_Pre-Images}{Bakir, Gökhan \& Weston, J. \& Schölkopf, Bernhard \& Thrun, S. \& Saul, L.. (2004). Learning to Find Pre-Images. Advances in Neural Information Processing Systems, 449-456 (2004)}
+\end{enumerate}
+
+
+\newpage
+\section{Clustering}
+Clustering is another unsupervised machine learning technique which is used to discover clusters in the data. Note that there is a big difference between clustering and classification. In classification, classes are assigned to the observations based on examples learned previously, whereas in clustering there are no previously learned examples (and so it is an unsupervised learning technique), the clusters are `discovered'. There are several methods of clustering such as partitioning methods, density-based methods, hierarchical methods, spectral clustering to name a few. Clustering has various applications, one example being the grouping of customer based on their purchase history in an e-commerce website, which eventually help in showing them products relevant to them. Another can be grouping of news articles based on keywords. A person clicking on a news article of a particular topic is likely to have an interest in it and hence can be shown more articles from the cluster.
+
+\subsection{Distance Measures}
+Before we proceed with clustering, let us look at distance measures, starting with the \textbf{Minkowski distance}. First, we define our data matrix as an $n \times d$ matrix, each row $x_i$ is an observation and the columns are the attributes. 
+The Minkowski between two points $x_i$ and $x_j$ is given as,
+$$d_{M}(x_i,x_j) = \sqrt[\leftroot{-2}\uproot{3}p]{ \abs{x_{i1}-x_{j1}}^p + \abs{x_{i2}-x_{j2}}^p + \dots + \abs{x_{id}-x_{jd}}^p}$$
+This quantity is also known as the $L_p$ norm. Putting $p=2$, we get the $L_2$ norm which is the very popular \textbf{Euclidean distance}:
+$$d_{e}(x_i,x_j) = \sqrt{ \abs{x_{i1}-x_{j1}}^2 + \abs{x_{i2}-x_{j2}}^2 + \dots + \abs{x_{id}-x_{jd}}^2} = \norm{x_i - x_j}_{L_2}$$
+Another important measure is \textbf{Manhattan distance}, which is the $L_1$ norm given as:
+$$d_{m}(x_i,x_j) = \abs{x_{i1}-x_{j1}} + \abs{x_{i2}-x_{j2}} + \dots + \abs{x_{id}-x_{jd}} = \norm{x_i - x_j}_{L_1}$$
+
+\subsection{K-means clustering}
+We will look at K-means clustering, partition based method in which each observation belongs to only one cluster (exclusive). There exists techniques such as fuzzy clustering and overlapping or non exclusive clustering but we will not be discussing about them.
+In k-means clustering we assign a prototype for a cluster, which is the mean of the observations in the cluster. Each observation is assigned the cluster for which the mean is closest to it. Let the data points be $x_1, x_2, \dots x_n$. We use the cluster indicator variables $z_1, z_2, \dots z_n$. Further we assume, that we want $k$ clusters, then $z_i \in \{1,2, \dots k\}$ where $i \in {1,2, \dots n}$
+
+To assess the quality of the clusters formed, we introduce the objective function as follows,
+\begin{gather}
+    F(z_1,z_2, \dots z_n) = \sum_{i=1}^{n} \norm{x_i - \mu_{z_{i}}}^{2}_{L_2}
+\end{gather}
+where, $\mu_{z_{i}}$ is the mean of the $z_i$'th cluster, that is the cluster assigned to $x_i$.
+The mean can be represented as follows:
+$$\mu_k = \dfrac{ \sum_{i=1}^{n} x_i \textbf{1}(z_i=k) }{ \sum_{i=1}^{n}\textbf{1}(z_i=k) }$$
+where $\textbf{1}(z_i = k) = \begin{cases} 1, \text{if $z_i=k$}\\ 0, \text{otherwise} \end{cases}$
+
+The point that best represents a set of points is the mean of the set, which is why in a good cluster we would want that the distance of each point from its cluster mean is minimum. Hence, our goal is to find $\min_{z_1, z_2 \dots z_k} F(z_1, z_2 \dots z_k)$, however doing so is an NP-hard problem, that is no technique guarantees optimal solution. Many heuristic algorithms have been developed for this purpose, we will start by looking at \textbf{Lloyd's algorithm}.
+
+\subsubsection{Lloyd's Algorithm}
+\subparagraph{Initialization}
+
+\subsection{Extra reading}
+
+\newpage
+\section{APPENDIX}
+\subsection{Appendix A: Projection and minimum error}
+Suppose that we want to find a point, closest to $u$ along the vector $v$. Let us represent such a point as $u_p$. Since $u_p$ is lies along $v$, it can be represented as a scaling such that $u_p= cv$. 
+
+\tikzset{every picture/.style={line width=0.75pt}} %set default line width to 0.75pt        
+\begin{tikzpicture}[x=0.75pt,y=0.75pt,yscale=-1,xscale=1]
+%uncomment if require: \path (0,142); %set diagram left start at 0, and has height of 142
+
+%Straight Lines [id:da8811309618840861] 
+\draw  [dash pattern={on 0.84pt off 2.51pt}]  (173,93.15) -- (349.15,93.15) -- (451,93.15) ;
+\draw [shift={(453,93.15)}, rotate = 180] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+%Straight Lines [id:da44471626216314] 
+\draw    (224.27,93.15) -- (331.65,30.71) ;
+\draw [shift={(333.38,29.71)}, rotate = 149.82] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+%Straight Lines [id:da582224729132168] 
+\draw    (224.27,93.15) -- (331.38,93.15) ;
+\draw [shift={(333.38,93.15)}, rotate = 180] [color={rgb, 255:red, 0; green, 0; blue, 0 }  ][line width=0.75]    (10.93,-3.29) .. controls (6.95,-1.4) and (3.31,-0.3) .. (0,0) .. controls (3.31,0.3) and (6.95,1.4) .. (10.93,3.29)   ;
+%Straight Lines [id:da4375529982340369] 
+\draw  [dash pattern={on 4.5pt off 4.5pt}]  (333.38,29.71) -- (333.38,93.36) ;
+
+% Text Node
+\draw (341.68,51.81) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle e$};
+% Text Node
+\draw (429.75,97.33) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle v$};
+% Text Node
+\draw (308.76,94.57) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle u_{p}$};
+% Text Node
+\draw (299.61,24.22) node [anchor=north west][inner sep=0.75pt]   [align=left] {$\displaystyle u$};
+\end{tikzpicture}
+
+\noindent It is evident that here we are trying to minimise $$\norm{e} = \norm{u -u_p} = \norm{u - cv}$$.Therefore,
+\begin{gather*}
+    c^{*}=\min_{c} \quad \norm{u-cv}^2 \\
+    \implies c^{*}=\min_{c} \quad (u_1 - cv_1)^2+(u_2-cv_2)^2\\
+    \implies c^{*} = \dfrac{u_1v_1+u_2v_2}{v_{1}^{2}+v_{2}^{2}}\\
+    \text{So,} \quad u_p = \left( \dfrac{u_1v_1+u_2v_2}{v_{1}^{2}+v_{2}^{2}} \right) \begin{bmatrix}v_1 \\ v_2 \end{bmatrix}\\
+    \implies \boxed{u_p = \left( \dfrac{u^Tv}{\norm{v}^2}\right) \begin{bmatrix}v_1 \\ v_2 \end{bmatrix}}
+\end{gather*}
+Clearly this is the projection of $u$ along $v$.
+
+
+\newpage
+\subsection{Appendix B: Data centering and dimension}
+We will see more intuitively about a case where $n<d$ for a $d \times n$ data matrix, $X = \{x_i:1\leq i\leq n,x_i\in\mathbb{R}^d\}$. We have said that if the data is centered, we will have only $(n-1)$ P.C.s. Think of a case where you have only 2 distinct data points, $x_1$ and $x_2$. How many P.C.s will be required for this data? Clearly there is no residue after one round, even if $x_1,x_2 \in \mathbb{R}^4$. The vector joining $x_1$ and $x_2$ captures all the variance.
+Now think of 3 non-linear points, one can again explain all the variance with (3-1)= 2 P.C.s. \\
+Why is data centering a big deal here? It is so because when we center our data, it establishes a linear relation in our data points. For a centered data mean is zero, $$ \dfrac{1}{n}\sum_{i=1}^{n} x_i = 0$$
+Clearly, $\{x_i, \dots x_n\}$ is not a set of linearly independent vectors anymore, however if we remove any vector from this set it might become independent. So, $rank(X) \leq n-1$.
+Additionally with some linear algebra we can prove that $rank(XX^T) = rank(X) \leq n-1$. The nullity is the dimension of kernel of a matrix, which is the eigenspace of eigenvalue 0. So this means there are at most $n-1$ non-zero eigenvalues of the covariance matrix which in turn means only a maximum of $n-1$ P.Cs can capture complete variance of data.
+
+\end{document}
