@@ -5,11 +5,12 @@
 \usepackage{amssymb}
 \usepackage{mathtools}
 \usepackage{physics}
-\usepackage[dvipsnames]{xcolor} 
+\usepackage[dvipsnames]{xcolor}
 \usepackage{tikz}
 \usepackage{epigraph} % for fancy quotes
 \usepackage{minted} % Required for highlightedcode listing
 \usepackage{float}
+\usepackage{tcolorbox}
 \usepackage{hyperref} % Required for referencing contents
 
 \hypersetup{
@@ -288,7 +289,8 @@ where $\textbf{1}(z_i = k) = \begin{cases} 1, \text{if $z_i=k$}\\ 0, \text{other
 The point that best represents a set of points is the mean of the set, which is why in a good cluster we would want that the distance of each point from its cluster mean is minimum. Hence, our goal is to find $\min_{z_1, z_2 \dots z_k} F(z_1, z_2 \dots z_k)$, however doing so is an NP-hard problem, that is no technique guarantees global optimal solution. Many heuristic algorithms have been developed for this purpose, we will start by looking at \textbf{Lloyd's algorithm}.
 
 \subsubsection{Lloyd's Algorithm}
-\par\noindent\rule{\textwidth}{0.4pt}
+
+\begin{tcolorbox}[colback=Periwinkle!5!white,colframe=RoyalBlue!55!Red,title= \textbf{Lloyd's Algorithm}]
 \textbf{Initialization}: Arbitrarily assign clusters: $z_1^0,z_2^0 \dots z_n^0$\\
 \textbf{Iterate until convergence}:
 \begin{enumerate}
@@ -296,7 +298,7 @@ The point that best represents a set of points is the mean of the set, which is 
     \item Update $z_i$ by assigning each $x_i$ the cluster whose mean is closest to it 
     $$z_i^{t+1} = \arg \min_k \norm{x_i - \mu_k^t}^2 \quad \forall i \in {1,2, \dots n}$$
 \end{enumerate}
-\par\noindent\rule{\textwidth}{0.4pt}
+\end{tcolorbox}
 
 Let's talk about the update step a little. If a point $x_i$ indeed changes its cluster after $t$'th iteration, then the following holds true:
 $$ \sum_{i=1}^{n} \norm{x_i - \mu^t_{z_i^{t+1}}}^2 \leq \sum_{i=1}^{n} \norm{x_i - \mu^t_{z_i^{t}}}^2$$ where $\mu_k^t$ is the mean of cluster $k$ after $t$'th update.
@@ -308,27 +310,29 @@ A question to ask here is how many iterations do we need? While the answer depen
 \subsubsection{Other algorithms}
 Let us now talk about initialization. In the original Lloyd's algorithm, the initialization is arbitrary. Different initial clusters can result in convergence to different local solutions. We can choose other initialization techniques such as in Gonzalez algorithm, in which we choose the furthest point from existing centers to be the new cluster center.
 
-\par\noindent\rule{\textwidth}{0.4pt}
-\textbf{Gonzalez Algorithm} \\
+\begin{tcolorbox}[colback=Periwinkle!5!white,colframe=RoyalBlue!55!Red,title= \textbf{Gonzalez Algorithm}]
 This initialization method is also known as furthest first traversal.
 \begin{enumerate}
     \item Arbitrarily assign $\mu_1^0$
     \item $\forall j=2, \dots k$, the data point that maximises the minimum distances is the new centroid given as: $$\mu_j^0 = \arg \max_x  \norm{x- \phi_{M(x)}}$$ where $\phi_{M}(x) = \arg \min_{\mu} \norm{x- \mu}$ returns center for which we get the minimum distance of $x$ from existing centroids
 \end{enumerate}
-\par\noindent\rule{\textwidth}{0.4pt}
+\end{tcolorbox}
+
 Once the initialization is done, we may proceed as in the Lloyd's algorithm. Note that here just a few outliers can affect the result.  There is another initialization algorithm, known as the k-means++ which offers better initialization using probabilistic measures.
 
-\par\noindent\rule{\textwidth}{0.4pt}
-\textbf{k-means++}
-\begin{enumerate}
+\begin{tcolorbox}[colback=Periwinkle!5!white,colframe=RoyalBlue!55!Red,title= \textbf{k-means++}]
+    \begin{enumerate}
     \item Arbitrarily assign $\mu_1^0$
     \item $\forall j =2, \dots ,k$ choose $\mu_j^0$ with probability proportional to score,  $$S(x) = \min_{j=1, \dots j-1} \norm{x- \mu_j^0}^2$$
 \end{enumerate}
-\par\noindent\rule{\textwidth}{0.4pt}
+After initialization we proceed with Lloyd's algorithm
+\end{tcolorbox}
+
 k-means++ often results to faster convergence. In fact, k-means++ also provides an upper bound to the solution quality, which is $\mathcal{O}(\log k)$ times the optimal solution of k-means, that is,
 $$ E \Bigl[ \sum_{i=1}^{n} \norm{x_i - \mu_{z_i}}^2 \Bigr] \leq \mathcal{O}(\log k) \Bigl[ \min_{\{z_1,z_2, \dots z_n\}} \sum_{i=1}^{n} \norm{x_i - \mu_{z_i}}^2 \Bigr]$$
 
 Now that we have seen a few algorithms, let us for once stress at how these clusters look like.
+
 
 \subsection{Choice of k}
 
