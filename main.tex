@@ -196,15 +196,15 @@ where $w$ is the $d \times d$ matrix with the principal components $w_i$'s as it
 \begin{gather}
     \norm{w_k} = 1 \implies w_k^T w_k = 1 \nonumber \\
     \implies (X \alpha_k)^T (X \alpha_k) =1 \nonumber \\
-    \implies \alpha_k^T(X^TX)\alpha_k = 1 
+    \implies \alpha_k^T(X^TX)\alpha_k = 1 \label{Gram eig1}
 \end{gather}
 In our case, we can write, 
 \begin{gather}
     \dfrac{1}{n} X^TX v_k= \lambda_k v_k \nonumber \\
     \implies v_k^T (\dfrac{1}{n} X^TX) v_k = \lambda_k (v_k^Tv_k) \nonumber \\
-    \implies \dfrac{v_k^T}{\sqrt{n\lambda_k}} (X^TX) \dfrac{v_k}{\sqrt{n\lambda_k}} = 1
+    \implies \dfrac{v_k^T}{\sqrt{n\lambda_k}} (X^TX) \dfrac{v_k}{\sqrt{n\lambda_k}} = 1 \label{Gram eig2}
 \end{gather}
-Comparing equations, (6) and (7) we can say, $\alpha_k = \dfrac{v_k}{\sqrt{n \lambda_k}}$.
+Comparing equations, \eqref{Gram eig1} and \eqref{Gram eig2} we can say, $\alpha_k = \dfrac{v_k}{\sqrt{n \lambda_k}}$.
 So we can perform eigendecomposition of \textbf{Gram matrix} ($X^TX$) which will be $\mathcal{O}(n^3)$, downscale the obtained eigenvectors of unit length by $\sqrt{n \lambda_k}$ and left multiply the matrix $X$ to the eigenvectors to obtain the principal components. 
 
 \subsection{Kernel PCA}
@@ -279,7 +279,7 @@ In k-means clustering we assign a prototype for a cluster, which is the mean of 
 
 To assess the quality of the clusters formed, we introduce the objective function as follows,
 \begin{gather}
-    F(z_1,z_2, \dots z_n) = \sum_{i=1}^{n} \norm{x_i - \mu_{z_{i}}}^{2}_{2}
+    F(z_1,z_2, \dots z_n) = \sum_{i=1}^{n} \norm{x_i - \mu_{z_{i}}}^{2}_{2} \label{obj-kmeans}
 \end{gather}
 where, $\mu_{z_{i}}$ is the mean of the $z_i$'th cluster, that is the cluster assigned to $x_i$.
 The mean can be represented as follows:
@@ -302,7 +302,7 @@ The point that best represents a set of points is the mean of the set, which is 
 
 Let's talk about the update step a little. If a point $x_i$ indeed changes its cluster after $t$'th iteration, then the following holds true:
 $$ \sum_{i=1}^{n} \norm{x_i - \mu^t_{z_i^{t+1}}}^2_2 \leq \sum_{i=1}^{n} \norm{x_i - \mu^t_{z_i^{t}}}^2_2$$ where $\mu_k^t$ is the mean of cluster $k$ after $t$'th update.
-Once again, for any cluster, the sum of $L_2$ distance from their mean is less than the sum of $L_2$ distance from any other point (Unless specified, consider we are using $L_2$ norm only) Hence we can say,
+Once again, for any cluster, the sum of $L_2$ distance from their mean is less than the sum of $L_2$ distance from any other point (unless specified, consider we are using $L_2$ norm only) Hence we can say,
 $$ \sum_{i=1}^{n} \norm{x_i - \mu^{t+1}_{z_i^{t+1}}}^2 \leq \sum_{i=1}^{n} \norm{x_i - \mu^t_{z_i^{t}}}^2$$
 Hence, the objective function reduces after each iteration. If it doesn't then it has converged to a local optima. The complexity for this algorithm is $\mathcal{O}(rknd)$ (where $r$ is the number of iterations before convergence, $k$ is the number of clusters, $n$ is the number of observations, $d$ is the dimension).
 A question to ask here is how many iterations do we need? While the answer depends on the initialization and the data itself, it is surely finite. Since the objective function decreases after each round and there are only a finite number of clusters possible. After a few rounds the change in the objective function also becomes smaller for each successive round. Hence we may stop once the change becomes smaller than a certain threshold minimum.
@@ -334,16 +334,16 @@ $$ E \Bigl[ \sum_{i=1}^{n} \norm{x_i - \mu_{z_i}}^2 \Bigr] \leq \mathcal{O}(\log
 Now that we have seen a few algorithms, let us for once stress at how these clusters look like.
 
 For points, say $x$ in cluster 1, the following inequality holds true,
-\begin{gather*}
-    \norm{x- \mu_1}^2 \leq \norm{x-\mu_i}^2 \quad \text{where} \quad i=2, \dots k\\
-    \norm{x}^2 + \norm{\mu_1}^2 - 2x^T\mu_1 \leq \norm{x}^2 + \norm{\mu_i}^2 - 2x^T\mu_i
-\end{gather*}
-\begin{align}
-    x^T(\mu_i-\mu_1) \leq \dfrac{\norm{\mu_i}^2 - \norm{\mu_1}^2}{2}
-\end{align}
-The equation above can be thought of as a decision boundary for the clusters with means $\mu_1$ and $\mu_i$.  Additionally, its worth noticing that the separation between any two clusters is linear. 
+\begin{gather}
+    \norm{x- \mu_1}^2 \leq \norm{x-\mu_i}^2 \quad \text{where} \quad i=2, \dots k \nonumber\\
+    \norm{x}^2 + \norm{\mu_1}^2 - 2x^T\mu_1 \leq \norm{x}^2 + \norm{\mu_i}^2 - 2x^T\mu_i \nonumber \\
+    x^T(\mu_i-\mu_1) \leq \dfrac{\norm{\mu_i}^2 - \norm{\mu_1}^2}{2} \label{kmeans-boundary}
+\end{gather}
 
-\subsection{Number of clusters}
+The equation \eqref{kmeans-boundary} above, can be thought of as a decision boundary creating half-spaces for the clusters with means $\mu_1$ and $\mu_i$.  Additionally, its worth noticing that the separation between any two clusters is linear and the regions formed on clustering are convex polygons. \textit{Given k-clusters, each cluster region is formed by intersection of $k-1$ half-spaces.} The regions formed in k-means clustering are \textbf{Voronoi regions}. Simply put, Voronoi regions are partitions of space for certain points, known as Voronoi sites, such that each region comprises of points closer to its Voronoi site compared to Voronoi sites of other regions. Unfortunately, detailing Voronoi diagrams is out of scope for this handout, interested readers are encouraged to check it out themselves.
+
+\subsection{Deciding k}
+An obvious question is, once given data, how many clusters should we choose? If we only keep minimising the value of objective function \eqref{obj-kmeans} as the only goal, we will end up with $k=n$, that is each point having its own cluster for which the value is 0. Additionally, large values of $k$ may not help our purpose of finding  groups of similar observations in the data. Hence we have to discourage large values of $k$.
 
 \subsection{Issues with k-means}
 
