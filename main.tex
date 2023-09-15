@@ -34,14 +34,14 @@
 Machine learning is a sub field of AI, computer science that deals with deriving meaning of vasts amount of data and predicting results based on it using mathematical ideas.\\
 Machine learning is not used for tasks that are procedural, for example finding Fibonacci sequence. Machine learning is not memorization, since it can predict values for unknown data based on previous training data. 
 \subsection{Broad Paradigms}
-\textbf{\underline{Supervised Learning}:} Supervised learning is where we have labeled data, i.e, we have input variables and output variables and the model learns the map between the two to predict output for test data.
+\textbf{\underline{Supervised Learning}:} Supervised learning is where we have labeled data, i.e, we have input variables and output variables and the model learns the map between the two.
 \begin{itemize}
     \item \underline{Classification}: When the goal is the classify the input data into different classes, its a classification problem. For example, email spam detection, we have two classes, an email can be either spam or not spam, which is a binary classification problem. Similarly there can be more than two classes, we have multiclass classification and when the classes are ordered (eg: High, Medium, Low) it is ordinal classification.
     \item \underline{Regression}: When the output variable is continuous, real number, it is a regression problem. For example: predicting the price of houses given its area, number of floors, rooms, location etc.
     \item \underline{Ranking}: When the goal is to order and sort the data based on relevant conditions. Foe example, a search engine ranking the news based on interaction data.
     \item \underline{Structure Learning}: When the output variable is a complex structure like a tree or a graph, it is structure learning. 
 \end{itemize}
-\textbf{\underline{Unsupervised Learning}:} When the data is unlabelled, in unsupervised learning our goal might be to label data into groups and find patterns in the data.
+\textbf{\underline{Unsupervised Learning}:} When the data is unlabelled, in unsupervised learning we will look at how to label data into groups, reducing dimensionality of data.
 \begin{itemize}
     \item \underline{Clustering}: Grouping the data into clusters of similar elements. For example, a use case can be grouping of news articles with similar topics together.
     \item \underline{Representation Learning}: The model learns to represent the data on its own. It often becomes difficult to work with very large data where there are too many elements in each input data point. In such cases, we reduce the number of elements in each input data points by finding which elements infer very less about the output.
@@ -54,8 +54,8 @@ Machine learning is not used for tasks that are procedural, for example finding 
 \end{itemize}
 
 \subsection{Representation Learning}
-\epigraph{\textit{Comprehension is compression}}{\textit{George Chaitin}}
-\noindent Suppose you have the following vectors: $\begin{bsmallmatrix}
+
+Suppose you have the following vectors: $\begin{bsmallmatrix}
     -7 \\ -14
 \end{bsmallmatrix}, \begin{bsmallmatrix}
     2.5 \\ 5
@@ -344,6 +344,13 @@ The equation \eqref{kmeans-boundary} above, can be thought of as a decision boun
 
 \subsection{Deciding k}
 An obvious question is, once given data, how many clusters should we choose? If we only keep minimising the value of objective function \eqref{obj-kmeans} as the only goal, we will end up with $k=n$, that is each point having its own cluster for which the value is 0. Additionally, large values of $k$ may not help our purpose of finding  groups of similar observations in the data. Hence we have to discourage large values of $k$.
+
+One way is to go by the ``elbow method", which is based on the idea that if we keep on increasing $k$, after a certain point improvement in clustering quality (or the change in objective function value) becomes smaller than certain threshold. However, this is very subjective and can be hard to decide on such a $k$ even after seeing the graph between number of cluster and objective function. Hence, we look at a rather objective approach which will penalise the increase of $k$ while also keeping into account the objective function (clustering quality). So the number of clusters would be given by a quantity similar to the following: $$k^* = \arg \min_k \quad [f(k) + \lambda k]$$ where $f(k)$ is a quantity that measures clustering quality and the extra `$\lambda k$' adds the penalty of having high number of clusters. Two criteria developed around these lines are as follows:
+\begin{itemize}
+    \item \textbf{AIC (Akaike Information Criterion) :} $$k^* = \arg \min_{k} \quad [2k - 2 \log{(\hat{L})}]$$ where $\hat{L}$ is the maximum-likelihood of the model.
+    \item  \textbf{BIC (Bayesian Information Criterion) :} $$k^* = \arg \min_{k} \quad [k \log(n) - 2\log{(\hat{L})}]$$ where $\hat{L}$ is the maximum-likelihood of the model and $n$ is the number of observations (data points).
+\end{itemize}
+
 
 \subsection{Issues with k-means}
 
