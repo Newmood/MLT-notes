@@ -345,16 +345,33 @@ The equation \eqref{kmeans-boundary} above, can be thought of as a decision boun
 \subsection{Deciding k}
 An obvious question is, once given data, how many clusters should we choose? If we only keep minimising the value of objective function \eqref{obj-kmeans} as the only goal, we will end up with $k=n$, that is each point having its own cluster for which the value is 0. Additionally, large values of $k$ may not help our purpose of finding  groups of similar observations in the data. Hence we have to discourage large values of $k$.
 
-One way is to go by the ``elbow method", which is based on the idea that if we keep on increasing $k$, after a certain point improvement in clustering quality (or the change in objective function value) becomes smaller than certain threshold. However, this is very subjective and can be hard to decide on such a $k$ even after seeing the graph between number of cluster and objective function. Hence, we look at a rather objective approach which will penalise the increase of $k$ while also keeping into account the objective function (clustering quality). So the number of clusters would be given by a quantity similar to the following: $$k^* = \arg \min_k \quad [f(k) + \lambda k]$$ where $f(k)$ is a quantity that measures clustering quality and the extra `$\lambda k$' adds the penalty of having high number of clusters. Two criteria developed around these lines are as follows:
+One way is to go by the \textbf{``elbow method"}, which is based on the idea that if we keep on increasing $k$, after a certain point improvement in clustering quality (or the change in objective function value) becomes smaller than certain threshold. However, this is very subjective and can be hard to decide on such a $k$ even after seeing the graph between number of cluster and objective function. Hence, we look at a rather objective approach which will penalise the increase of $k$ while also keeping into account the objective function (depicting clustering quality). So the number of clusters would be given by a quantity similar to the following: $$k^* = \arg \min_k \quad [-f(k) + \lambda k]$$ where $f(k)$ is a quantity that measures clustering quality and the extra `$\lambda k$' adds the penalty of having high number of clusters. Two criteria developed that can be used for this purpose are as follows:
 \begin{itemize}
     \item \textbf{AIC (Akaike Information Criterion) :} $$k^* = \arg \min_{k} \quad [2k - 2 \log{(\hat{L})}]$$ where $\hat{L}$ is the maximum-likelihood of the model.
     \item  \textbf{BIC (Bayesian Information Criterion) :} $$k^* = \arg \min_{k} \quad [k \log(n) - 2\log{(\hat{L})}]$$ where $\hat{L}$ is the maximum-likelihood of the model and $n$ is the number of observations (data points).
 \end{itemize}
 
-
 \subsection{Issues with k-means}
 
+The simple Lloyd's algorithm randomly assigns initial centroids, this can often produce clusters with high value of objective function. To minimize this, other algorithms like Gonzalez algorithm can be used, but it has high risk of producing bad clusters in presence of outliers, to minimize this k-means++ can be used which offers a better initialization. However, it is still good to run the algorithm a few number of times and choose the best clustering result.
+
+k-means generates convex shaped clusters, hence not being able to model clusters that are non-convex, non-linear or irregularly shaped, in such a case we can use the kernel trick and perform \textbf{kernel k-means} instead. Some other variants of k-means are \textbf{k-medians}, \textbf{k-medoids} and \textbf{k-modes}. k-medians is less affected by outliers since the centroids are the medians of the clusters. We have seen that the objective function in k-means is the Euclidean distance, however both k-medians and k-medoids use the Manhattan distance. In k-medoids the centroids are the points chosen from the dataset. We might be interested to perform clustering over data with categorical attributes and so in that case we can use the k-modes approach. In k-modes the centroid is chosen as the combination of mode for each categorical attribute.
+
+It is to be noted that to use the above algorithms, number of clusters is to be predefined. \textbf{Hierarchical clustering} and \textbf{denisty based clustering} overcome this issue. Density based models take into account the density of points and can model non-linear structures and are additionally better in presence of outliers. Density based models are also used in outlier detection, which we may look at a later section. Hierarchical clustering can provide very useful insights about the data.
+
+
+Once again, k-means is a type of hard clustering, meaning any point can only belong to one cluster. Sometimes it maybe more convenient to have a point assigned to more than one cluster which is in the case of soft clustering. In the next section we will look at a soft clustering algorithm known as the EM algorithm.
+
 \subsection{Extra reading}
+For further reading on the topics of this section, one may refer the following resources:
+\begin{enumerate}
+    \item Data Mining: The Textbook by Charu C. Aggarwal, 2015, Chapter 6 and 7
+    \item Introduction to Information Retrieval by Christopher D. Manning, Prabhakar Raghavan and Hinrich Schütze, 2008, Chapter 16 and 17
+\end{enumerate}
+
+\newpage
+\section{Probabilistic Model and EM}
+
 
 \newpage
 \section{APPENDIX}
