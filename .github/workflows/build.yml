@@ -26,7 +26,9 @@ jobs:
     
     - name: Copy texmf folder
       run: |
-        cp -r texmf $GITHUB_WORKSPACE
+        if [ -d "texmf" ]; then
+          cp -r texmf $GITHUB_WORKSPACE
+        fi
 
     - name: Build PDF
       working-directory: ${{ github.workspace }}
