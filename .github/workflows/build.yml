@@ -12,37 +12,23 @@ jobs:
     steps:
     - name: Checkout Repository
       uses: actions/checkout@v2
-      with:
-        path: ${{ github.workspace }}
 
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: 3.8
-
-    - name: Install dependencies
+    - name: Set up LaTeX
       run: |
-        sudo apt-get install -y texlive-xetex
-    
-    - name: Copy texmf folder
-      run: |
-        if [ -d "texmf" ]; then
-          cp -r texmf $GITHUB_WORKSPACE
-        fi
+        sudo apt-get install -y texlive-base
 
     - name: Build PDF
       working-directory: ${{ github.workspace }}
       run: |
-        xelatex -interaction=nonstopmode -halt-on-error main.tex
-        mv main.pdf $GITHUB_WORKSPACE/output.pdf
+        pdflatex -interaction=nonstopmode -halt-on-error -output-directory=build main.tex
+        mv build/main.pdf $GITHUB_WORKSPACE/main.pdf
 
   deploy:
     runs-on: ubuntu-latest
     needs: build
     steps:
     - name: Deploy to GitHub Pages
-      uses: JamesIves/github-pages-deploy-action@3.7.1
+      uses: peaceiris/actions-gh-pages@v3
       with:
-        ACCESS_TOKEN: ${{ secrets.ACCESS_TOKEN }}
-        BRANCH: gh-pages
-        FOLDER: $GITHUB_WORKSPACE
+        deploy_key: ${{ secrets.ACCESS_TOKEN }}
+        publish_dir: ${{ github.workspace }}
