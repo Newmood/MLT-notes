@@ -10,6 +10,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+    - name: Checkout Repository
+      uses: actions/checkout@v2
+      with:
+        path: ${{ github.workspace }}
+
     - name: Set up Python
       uses: actions/setup-python@v2
       with:
@@ -20,6 +25,7 @@ jobs:
         sudo apt-get install -y texlive-xetex
 
     - name: Build PDF
+      working-directory: ${{ github.workspace }}
       run: |
         xelatex -interaction=nonstopmode -halt-on-error main.tex
         mv main.pdf $GITHUB_WORKSPACE/output.pdf
