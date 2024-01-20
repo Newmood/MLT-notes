@@ -23,6 +23,10 @@ jobs:
     - name: Install dependencies
       run: |
         sudo apt-get install -y texlive-xetex
+    
+    - name: Copy texmf folder
+      run: |
+        cp -r texmf $GITHUB_WORKSPACE
 
     - name: Build PDF
       working-directory: ${{ github.workspace }}
