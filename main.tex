@@ -7,7 +7,7 @@
 \usepackage{physics}
 \usepackage[dvipsnames]{xcolor}
 \usepackage{tikz}
-\usepackage{epigraph} % for fancy quotes
+\usepackage{epigraph} % For fancy quotes
 \usepackage{minted} % Required for highlightedcode listing
 \usepackage{float}
 \usepackage{tcolorbox}
@@ -25,12 +25,13 @@
 \begin{document}
 
 \maketitle
+This document is under development.
 
 \tableofcontents
 \newpage
 
 \section{Introduction}
-\subsection{What is machine leanring?}
+\subsection{What is machine learning?}
 Machine learning is a sub field of AI, computer science that deals with deriving meaning of vasts amount of data and predicting results based on it using mathematical ideas.\\
 Machine learning is not used for tasks that are procedural, for example finding Fibonacci sequence. Machine learning is not memorization, since it can predict values for unknown data based on previous training data. 
 \subsection{Broad Paradigms}
@@ -254,7 +255,7 @@ Suppose we only keep up to some $l$ principal components, then the observation $
 \subsection{Extra reading}
 For further reading on the topics one may refer to the following resources:
 \begin{enumerate}
-    \item Section 12.1 and 12.3, Pattern Recognition and Machine Learning by Christopher M. Bishop
+    \item Pattern Recognition and Machine Learning by Christopher M. Bishop, 2006, Section 12.1 and 12.3
     \item \href{https://axon.cs.byu.edu/~martinez/classes/778/Papers/KernelPCA.pdf}{Scholkopf B, Smola A, and Müller KR, Kernel principal component analysis, 1999}
     \item \href{https://www.researchgate.net/publication/41781235_Learning_to_Find_Pre-Images}{Bakir, Gökhan \& Weston, J. \& Schölkopf, Bernhard \& Thrun, S. \& Saul, L.. (2004). Learning to Find Pre-Images. Advances in Neural Information Processing Systems, 449-456 (2004)}
 \end{enumerate}
@@ -353,24 +354,27 @@ One way is to go by the \textbf{``elbow method"}, which is based on the idea tha
 
 \subsection{Issues with k-means}
 
-The simple Lloyd's algorithm randomly assigns initial centroids, this can often produce clusters with high value of objective function. To minimize this, other algorithms like Gonzalez algorithm can be used, but it has high risk of producing bad clusters in presence of outliers, to minimize this k-means++ can be used which offers a better initialization. However, it is still good to run the algorithm a few number of times and choose the best clustering result.
+The simple Lloyd's algorithm randomly assigns initial centroids, this can often produce clusters with high value of objective function. To overcome this, other algorithms offering better initialization can be used, for instance the Gonzalez algorithm but it has high risk of producing bad clusters in presence of outliers, to minimize this k-means++ can be used which offers a better initialization. However, it is still good to run the algorithm a few number of times and choose the best clustering result.
 
 k-means generates convex shaped clusters, hence not being able to model clusters that are non-convex, non-linear or irregularly shaped, in such a case we can use the kernel trick and perform \textbf{kernel k-means} instead. Some other variants of k-means are \textbf{k-medians}, \textbf{k-medoids} and \textbf{k-modes}. k-medians is less affected by outliers since the centroids are the medians of the clusters. We have seen that the objective function in k-means is the Euclidean distance, however both k-medians and k-medoids use the Manhattan distance. In k-medoids the centroids are the points chosen from the dataset. We might be interested to perform clustering over data with categorical attributes and so in that case we can use the k-modes approach. In k-modes the centroid is chosen as the combination of mode for each categorical attribute.
 
 It is to be noted that to use the above algorithms, number of clusters is to be predefined. \textbf{Hierarchical clustering} and \textbf{denisty based clustering} overcome this issue. Density based models take into account the density of points and can model non-linear structures and are additionally better in presence of outliers. Density based models are also used in outlier detection, which we may look at a later section. Hierarchical clustering can provide very useful insights about the data.
 
 
-Once again, k-means is a type of hard clustering, meaning any point can only belong to one cluster. Sometimes it maybe more convenient to have a point assigned to more than one cluster which is in the case of soft clustering. In the next section we will look at a soft clustering algorithm known as the EM algorithm.
+Once again, k-means is a type of hard clustering, meaning any point can only belong to one cluster. Sometimes it maybe more convenient to have a point associated with more than one cluster which is in the case of soft clustering. In the next section we will look at a soft clustering algorithm known as the EM algorithm.
 
 \subsection{Extra reading}
 For further reading on the topics of this section, one may refer the following resources:
 \begin{enumerate}
-    \item Data Mining: The Textbook by Charu C. Aggarwal, 2015, Chapter 6 and 7
-    \item Introduction to Information Retrieval by Christopher D. Manning, Prabhakar Raghavan and Hinrich Schütze, 2008, Chapter 16 and 17
+    \item Data Mining: The Textbook by Charu C. Aggarwal, 2015, Section 6.1, 6.3
+    \item Introduction to Information Retrieval by Christopher D. Manning, Prabhakar Raghavan and Hinrich Schütze, 2008, Section: 16.1, 16.2, 16.4
 \end{enumerate}
 
 \newpage
 \section{Probabilistic Model and EM}
+Once again, before heading straight with the topic we will review the background once. 
+
+
 
 
 \newpage
